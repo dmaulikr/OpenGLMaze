@@ -25,6 +25,9 @@
 		09500FE31E7B279E009AF693 /* MazeConnector.mm in Sources */ = {isa = PBXBuildFile; fileRef = 09500FD01E7B279E009AF693 /* MazeConnector.mm */; };
 		09500FE41E7B279E009AF693 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 09500FD21E7B279E009AF693 /* Shader.fsh */; };
 		09500FE51E7B279E009AF693 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 09500FD31E7B279E009AF693 /* Shader.vsh */; };
+		09EC95A01E7F577B0005E425 /* ObjParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 09EC959F1E7F577B0005E425 /* ObjParser.m */; };
+		09EC95A41E7F59440005E425 /* monkey.obj in Resources */ = {isa = PBXBuildFile; fileRef = 09EC95A31E7F59440005E425 /* monkey.obj */; };
+		09EC95A61E7F59610005E425 /* monkey.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 09EC95A51E7F59610005E425 /* monkey.mtl */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +54,10 @@
 		09500FD01E7B279E009AF693 /* MazeConnector.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MazeConnector.mm; sourceTree = "<group>"; };
 		09500FD21E7B279E009AF693 /* Shader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.fsh; sourceTree = "<group>"; };
 		09500FD31E7B279E009AF693 /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.vsh; sourceTree = "<group>"; };
+		09EC959F1E7F577B0005E425 /* ObjParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ObjParser.m; sourceTree = "<group>"; };
+		09EC95A11E7F57A60005E425 /* ObjParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjParser.h; sourceTree = "<group>"; };
+		09EC95A31E7F59440005E425 /* monkey.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = monkey.obj; sourceTree = "<group>"; };
+		09EC95A51E7F59610005E425 /* monkey.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = monkey.mtl; sourceTree = "<group>"; };
 		590EA93F1E6DE7540054AD78 /* Assignment2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Assignment2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -68,6 +75,7 @@
 		09500FB91E7B279E009AF693 /* OpenGLMaze */ = {
 			isa = PBXGroup;
 			children = (
+				09EC95A21E7F593A0005E425 /* Models */,
 				09500FE61E7B2822009AF693 /* Images */,
 				09500FBA1E7B279E009AF693 /* AppDelegate.h */,
 				09500FBB1E7B279E009AF693 /* AppDelegate.m */,
@@ -84,6 +92,8 @@
 				09500FCE1E7B279E009AF693 /* maze.h */,
 				09500FCF1E7B279E009AF693 /* MazeConnector.h */,
 				09500FD01E7B279E009AF693 /* MazeConnector.mm */,
+				09EC95A11E7F57A60005E425 /* ObjParser.h */,
+				09EC959F1E7F577B0005E425 /* ObjParser.m */,
 				09500FD11E7B279E009AF693 /* Shaders */,
 			);
 			path = OpenGLMaze;
@@ -109,6 +119,15 @@
 				09500FC61E7B279E009AF693 /* crate.jpg */,
 			);
 			name = Images;
+			sourceTree = "<group>";
+		};
+		09EC95A21E7F593A0005E425 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				09EC95A51E7F59610005E425 /* monkey.mtl */,
+				09EC95A31E7F59440005E425 /* monkey.obj */,
+			);
+			name = Models;
 			sourceTree = "<group>";
 		};
 		590EA9361E6DE7540054AD78 = {
@@ -186,11 +205,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				09EC95A41E7F59440005E425 /* monkey.obj in Resources */,
 				09500FDD1E7B279E009AF693 /* crate.jpg in Resources */,
 				09500FE41E7B279E009AF693 /* Shader.fsh in Resources */,
 				09500FD91E7B279E009AF693 /* c2.jpg in Resources */,
 				09500FD71E7B279E009AF693 /* Main.storyboard in Resources */,
 				09500FDB1E7B279E009AF693 /* c4.jpg in Resources */,
+				09EC95A61E7F59610005E425 /* monkey.mtl in Resources */,
 				09500FD81E7B279E009AF693 /* c1.jpg in Resources */,
 				09500FDA1E7B279E009AF693 /* c3.jpg in Resources */,
 				09500FDC1E7B279E009AF693 /* c5.jpg in Resources */,
@@ -213,6 +234,7 @@
 				09500FE31E7B279E009AF693 /* MazeConnector.mm in Sources */,
 				09500FE11E7B279E009AF693 /* main.m in Sources */,
 				09500FE21E7B279E009AF693 /* maze.cpp in Sources */,
+				09EC95A01E7F577B0005E425 /* ObjParser.m in Sources */,
 				09500FD41E7B279E009AF693 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

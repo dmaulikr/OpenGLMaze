@@ -9,6 +9,7 @@
 #import "GameViewController.h"
 #import <OpenGLES/ES2/glext.h>
 #import "MazeConnector.h"
+#import "ObjParser.h"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -122,6 +123,8 @@ GLfloat gCubeVertexData[216] =
     // Shape vertices, etc. and textures
     GLfloat *vertices, *normals, *texCoords;
     GLuint numIndices, *indices;
+    GLfloat *mvertices, *mnormals, *mtextures;
+    GLuint *mindices;
     /* texture parameters ??? */
     GLuint crateTexture;
     GLuint CT1;
@@ -195,10 +198,7 @@ GLfloat gCubeVertexData[216] =
     fog.textColor = [UIColor redColor];
     fogamt.textColor = [UIColor redColor];
     flashlight.textColor = [UIColor redColor];
-    
-    
 
-    
     [self setupGL];
 }
 
@@ -239,8 +239,7 @@ GLfloat gCubeVertexData[216] =
     
     // Load shaders
     [self loadShaders];
-    
-    
+
     // Get uniform locations.
     uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = glGetUniformLocation(_program, "modelViewProjectionMatrix");
     uniforms[UNIFORM_NORMAL_MATRIX] = glGetUniformLocation(_program, "normalMatrix");
@@ -308,6 +307,12 @@ GLfloat gCubeVertexData[216] =
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, crateTexture);
     glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
+
+#pragma mark - Load Monkey Model (Test)
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSString *path = [mainBundle pathForResource:@"monkey" ofType:@"obj"];
+    ObjParser *objParse = [[ObjParser alloc] init];
+    [objParse parseFile:path _vertices:&mvertices _normals:&mnormals _textures:&mtextures _indicies:&mindices];
 }
 
 - (void)tearDownGL
