@@ -9,7 +9,7 @@
 #import "ObjParser.h"
 
 @implementation ObjParser
-- (void)parseFile: (NSString *)_path _vertices:(GLfloat **)_vertices _normals:(GLfloat **)_normals _textures:(GLfloat **)_textures _indicies:(GLuint **)_indicies
+- (void)parseFile: (NSString *)_path _vertices:(GLfloat **)_vertices _normals:(GLfloat **)_normals _textures:(GLfloat **)_textures _indicies:(GLuint **)_indicies _count:(int **)_count
    {
        NSArray *lineArray;
        int vcur = 0, ncur = 0, tcur = 0, icur = 0;
@@ -50,39 +50,43 @@
                }
            }
        }
-       GLfloat **vglf = [self convertArraytoGLfloat:v];
-       GLfloat **nglf = [self convertArraytoGLfloat:n];
-       GLfloat **tglf = [self convertArraytoGLfloat:t];
-       GLuint **igli = [self convertArraytoGLuint:i];
-       [self copyGLfloat:*vglf to:_vertices count:vcur];
-       [self copyGLfloat:*nglf to:_normals count:ncur];
-       [self copyGLfloat:*tglf to:_textures count:tcur];
-       [self copyGLuint:*igli to:_indicies count:icur];
+       [self convertArraytoGLfloat:v]; // sets glf
+       [self copyGLfloat:glf to:_vertices count:vcur];
+       [self convertArraytoGLfloat:n];
+       [self copyGLfloat:glf to:_normals count:ncur];
+       [self convertArraytoGLfloat:t];
+       [self copyGLfloat:glf to:_textures count:tcur];
+       [self convertArraytoGLuint:i];
+       [self copyGLuint:glu to:_indicies count:icur];
+       *_count = realloc(*_count, sizeof(int));
+       *_count = &icur;
    }
 - (void)copyGLfloat: (GLfloat*)from to:(GLfloat **)to count:(int)count {
-    *to = malloc(sizeof(GLfloat) * count);
+    *&to = malloc(sizeof(GLfloat) * count);
     for(int i = 0; i < count; i++) {
-        *to[i] = from[i];
+        to[i] = &from[i];
     }
 }
 - (void)copyGLuint: (GLuint*)from to:(GLuint **)to count:(int)count {
-    *to = malloc(sizeof(GLuint) * count);
+    *&to = malloc(sizeof(GLuint) * count);
     for(int i = 0; i < count; i++) {
-        *to[i] = from[i];
+        to[i] = &from[i];
     }
 }
-- (GLfloat **)convertArraytoGLfloat:(NSMutableArray *)ns {
-    GLfloat *gl = malloc(sizeof(GLfloat) * [ns count]);
-    for (int i = 0; i < [ns count]; i++) {
-        gl[i] = (GLfloat) [[ns objectAtIndex:i] floatValue];
+- (void)convertArraytoGLfloat:(NSMutableArray *)ns {
+    glf = realloc(glf, sizeof([ns count]));
+    if (glf != NULL) {
+        for (int i = 0; i < [ns count]; i++) {
+            glf[i] = (GLfloat) [[ns objectAtIndex:i] floatValue];
+        }
     }
-    return &gl;
 }
-- (GLuint **)convertArraytoGLuint:(NSMutableArray *)ns {
-    GLfloat *gl = malloc(sizeof(GLuint) * [ns count]);
-    for (int i = 0; i < [ns count]; i++) {
-        gl[i] = (GLuint) [[ns objectAtIndex:i] floatValue];
+- (void)convertArraytoGLuint:(NSMutableArray *)ns {
+    glu = realloc(glu, sizeof([ns count]));
+    if (glu != NULL) {
+        for (int i = 0; i < [ns count]; i++) {
+            glu[i] = (GLuint) [[ns objectAtIndex:i] floatValue];
+        }
     }
-    return &gl;
 }
 @end

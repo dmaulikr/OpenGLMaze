@@ -9,9 +9,13 @@
 #import <GLKit/GLKit.h>
 
 @interface ObjParser : NSObject
-- (void)parseFile: (NSString *)_path _vertices:(GLfloat **)_vertices _normals:(GLfloat **)_normals _textures:(GLfloat **)_textures _indicies:(GLuint **)_indicies;
+{
+    GLfloat *glf;
+    GLuint *glu;
+}
+- (void)parseFile: (NSString *)_path _vertices:(GLfloat **)_vertices _normals:(GLfloat **)_normals _textures:(GLfloat **)_textures _indicies:(GLuint **)_indicies _count:(int **)_count;
 - (void)copyGLfloat: (GLfloat *)from to:(GLfloat **)to count:(int)count;
 - (void)copyGLuint: (GLuint *)from to:(GLuint **)to count:(int)count;
-- (GLfloat **)convertArraytoGLfloat:(NSMutableArray *)ns;
-- (GLuint **)convertArraytoGLuint:(NSMutableArray *)ns;
+- (void)convertArraytoGLfloat:(NSMutableArray *)ns;
+- (void)convertArraytoGLuint:(NSMutableArray *)ns;
 @end

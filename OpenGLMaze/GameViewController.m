@@ -125,6 +125,7 @@ GLfloat gCubeVertexData[216] =
     GLuint numIndices, *indices;
     GLfloat *mvertices, *mnormals, *mtextures;
     GLuint *mindices;
+    int *mcount;
     /* texture parameters ??? */
     GLuint crateTexture;
     GLuint CT1;
@@ -137,6 +138,9 @@ GLfloat gCubeVertexData[216] =
     GLuint _vertexArray;
     GLuint _vertexBuffers[3];
     GLuint _indexBuffer;
+    GLuint _mvertexArray;
+    GLuint _mvertexBuffers[3];
+    GLuint _mindexBuffer;
 
     __weak IBOutlet UILabel *daynight;
     __weak IBOutlet UILabel *flashlight;
@@ -312,7 +316,28 @@ GLfloat gCubeVertexData[216] =
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSString *path = [mainBundle pathForResource:@"monkey" ofType:@"obj"];
     ObjParser *objParse = [[ObjParser alloc] init];
-    [objParse parseFile:path _vertices:&mvertices _normals:&mnormals _textures:&mtextures _indicies:&mindices];
+    [objParse parseFile:path _vertices:&mvertices _normals:&mnormals _textures:&mtextures _indicies:&mindices _count:&mcount];
+    
+    // Set up GL buffers - Monkey
+    glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*3*numVerts, mvertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(GLKVertexAttribPosition);
+    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
+    
+    glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*3*numVerts, mnormals, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(GLKVertexAttribNormal);
+    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
+    
+    glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[2]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*3*numVerts, mtextures, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
+    glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), BUFFER_OFFSET(0));
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * *mcount, mindices, GL_STATIC_DRAW);
+    
+    glBindVertexArrayOES(0);
 }
 
 - (void)tearDownGL
