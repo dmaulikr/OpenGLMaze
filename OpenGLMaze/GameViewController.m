@@ -161,6 +161,10 @@ GLfloat gCubeVertexData[216] =
     GLKMatrix4 projectionMatrix;
     GLKMatrix4 baseModelViewMatrix;
     
+    float monkeyXPos;
+    float monkeyYPos;
+    BOOL moving;
+    BOOL canmove;
 }
 @property (strong, nonatomic) EAGLContext *context;
 @property (strong, nonatomic) GLKBaseEffect *effect;
@@ -410,6 +414,80 @@ GLfloat gCubeVertexData[216] =
             
         }
     }
+    
+    // monkey movement
+    // if (canmove) {
+        // randomly move monkey in the maze
+        // current position = monkeyXPos and monekyYPos
+        
+        // see what walls are around me
+    for (tile *ct in tilearray) {
+        
+        if ((ct->c == monkeyXPos) && (ct->r == monkeyYPos)) {
+            int r = arc4random_uniform(15);
+            int rr = arc4random_uniform(4);
+            if (r == 0) {
+                NSLog(@"POS:%d, %d, %d, %d", ct->nwe, ct->ewe, ct->swe, ct->wwe);
+                NSLog(@"PREPOS1:%f, %f", monkeyXPos, monkeyYPos);
+                
+                switch (rr) {
+                    case 0:
+                        if ((!ct->nwe) && (monkeyYPos + 1 <= 3)) {
+                            // move north, which is -z
+                            monkeyYPos = monkeyYPos + 1;
+                            break;
+                        }
+                        
+                    case 1:
+                        if ((!ct->ewe) && (monkeyXPos +1 <=3 )) {
+                            // move right, which is +x
+                            monkeyXPos = monkeyXPos + 1;
+                            break;
+                        }
+                        
+                    case 2:
+                        if ((!ct->swe) && (monkeyYPos -1 >= 0)) {
+                            // move back, which is +z
+                            monkeyYPos = monkeyYPos - 1;
+                            break;
+                        }
+                    case 3:
+                        if ((!ct->wwe) && (monkeyXPos -1 >= 0)) {
+                            // move left, which is -x
+                            monkeyXPos = monkeyXPos - 1;
+                        }
+                        break;
+                }
+            }
+
+        }
+        
+    }
+    
+    
+    
+    //}
+    
+    NSLog(@"PREPOS2:%f, %f", monkeyXPos, monkeyYPos);
+
+    if (monkeyYPos <= 0) {
+        monkeyYPos = 0;
+    }
+    
+    if (abs((int) monkeyYPos) >= 3) {
+        monkeyYPos = 3;
+    }
+    
+    if (monkeyXPos <= 0) {
+        monkeyXPos = 0;
+    }
+    
+    if (abs((int) monkeyXPos) >= 3) {
+        monkeyXPos = 3;
+    }
+    
+    NSLog(@"POS:%f, %f", monkeyXPos, monkeyYPos);
+
 }
 
 - (IBAction)panning:(UIPanGestureRecognizer *)sender {
@@ -438,8 +516,8 @@ GLfloat gCubeVertexData[216] =
     glUseProgram(_program);
     
     // Set up base model view matrix (place camera)
-    baseModelViewMatrix = GLKMatrix4MakeTranslation(posPoint.x, -1, posPoint.y-6.0f);
-    // baseModelViewMatrix = GLKMatrix4RotateX(baseModelViewMatrix, 1);
+    baseModelViewMatrix = GLKMatrix4MakeTranslation(posPoint.x, -1, posPoint.y -6.0f);
+    baseModelViewMatrix = GLKMatrix4RotateX(baseModelViewMatrix, 1.5);
     
     // Set up model view matrix (place model in world)
     _modelViewMatrix = baseModelViewMatrix;
@@ -690,9 +768,36 @@ GLfloat gCubeVertexData[216] =
             glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
         }
     }
+    
+    // DRAW MONKEY
+    GLKMatrix4 monkeytempModelView = baseModelViewMatrix;
+    
+    // monkey moving
+    monkeytempModelView = GLKMatrix4Translate(monkeytempModelView, monkeyXPos*1.5, .5, monkeyYPos*-1.5);
+    // monkey scaling
+    monkeytempModelView = GLKMatrix4Scale(monkeytempModelView, .6, .6, .6);
+    GLKMatrix4 monkeytempNormal = GLKMatrix4InvertAndTranspose(monkeytempModelView, NULL);
+    
+    GLKMatrix4 monkeytempModelProj = GLKMatrix4Multiply(projectionMatrix, monkeytempModelView);
+    
+    glBindTexture(GL_TEXTURE_2D, CT3);
+    glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
+    
+    // Set up uniforms
+    glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, monkeytempModelProj.m);
+    glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, monkeytempNormal.m);
+    glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEW_MATRIX], 1, 0, monkeytempModelView.m);
+    /* set lighting parameters... */
+    glUniform3fv(uniforms[UNIFORM_FLASHLIGHT_POSITION], 1, flashlightPosition.v);
+    glUniform3fv(uniforms[UNIFORM_DIFFUSE_LIGHT_POSITION], 1, diffuseLightPosition.v);
+    glUniform4fv(uniforms[UNIFORM_DIFFUSE_COMPONENT], 1, diffuseComponent.v);
+    glUniform1f(uniforms[UNIFORM_SHININESS], shininess);
+    glUniform4fv(uniforms[UNIFORM_SPECULAR_COMPONENT], 1, specularComponent.v);
+    glUniform4fv(uniforms[UNIFORM_AMBIENT_COMPONENT], 1, ambientComponent.v);
+    
     // Select VBO and draw
-//    glBindVertexArrayOES(_mindexBuffer);
-//    glDrawArrays(GL_TRIANGLES, 0, *mcount);
+    //    glBindVertexArrayOES(_mindexBuffer);
+    //    glDrawArrays(GL_TRIANGLES, 0, *mcount);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
     glDrawElements(GL_TRIANGLES, *mcount, GL_UNSIGNED_INT, 0);
     glBindVertexArrayOES(0); // reset buffer
