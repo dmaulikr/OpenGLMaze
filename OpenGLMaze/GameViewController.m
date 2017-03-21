@@ -162,6 +162,9 @@ GLfloat gCubeVertexData[216] =
     GLKMatrix4 projectionMatrix;
     GLKMatrix4 baseModelViewMatrix;
     
+    float monkeyXPos;
+    float monkeyYPos;
+    BOOL moving;
 }
 @property (strong, nonatomic) EAGLContext *context;
 @property (strong, nonatomic) GLKBaseEffect *effect;
@@ -407,6 +410,117 @@ GLfloat gCubeVertexData[216] =
             
         }
     }
+    
+    // monkey movement
+    // if (moving) {
+        // randomly move monkey in the maze
+        // current position = monkeyXPos and monekyYPos
+        
+        // see what walls are around me
+        tile *ct = [[tile alloc] init];
+        ct->swe = [lemaze GetCellN:(int) monkeyXPos : abs((int) monkeyYPos)];
+        ct->nwe = [lemaze GetCellS:(int) monkeyXPos : abs((int) monkeyYPos)];
+        ct->ewe = [lemaze GetCellE:(int) monkeyXPos : abs((int) monkeyYPos)];
+        ct->wwe = [lemaze GetCellW:(int) monkeyXPos : abs((int) monkeyYPos)];
+        
+        int r = arc4random_uniform(1);
+        int rr = arc4random_uniform(4);
+        if (r == 0) {
+            NSLog(@"PREPOS1:%f, %f", monkeyXPos, monkeyYPos);
+
+            switch (rr) {
+                case 0:
+                    if (!ct->nwe) {
+                        // move north, which is -z
+                        monkeyYPos = monkeyYPos + 1;
+                    } else if (!ct->ewe) {
+                        // move right, which is +x
+                        monkeyXPos = monkeyXPos + 1;
+                    } else if (!ct->swe) {
+                        // move back, which is +z
+                        monkeyYPos = monkeyYPos - 1;
+                    } else if (!ct->wwe) {
+                        // move left, which is -x
+                        monkeyXPos = monkeyXPos - 1;
+                    } else {
+                        // can't move.
+                    }
+                    break;
+                case 1:
+                    if (!ct->ewe) {
+                        // move right, which is +x
+                        monkeyXPos = monkeyXPos + 1;
+                    } else if (!ct->swe) {
+                        // move back, which is +z
+                        monkeyYPos = monkeyYPos - 1;
+                    } else if (!ct->wwe) {
+                        // move left, which is -x
+                        monkeyXPos = monkeyXPos - 1;
+                    } else if (!ct->nwe) {
+                        // move north, which is -z
+                        monkeyYPos = monkeyYPos + 1;
+                    } else {
+                        // can't move.
+                    }
+                    break;
+                case 2:
+                    if (!ct->swe) {
+                        // move back, which is +z
+                        monkeyYPos = monkeyYPos - 1;
+                    } else if (!ct->wwe) {
+                        // move left, which is -x
+                        monkeyXPos = monkeyXPos - 1;
+                    } else if (!ct->nwe) {
+                        // move north, which is -z
+                        monkeyYPos = monkeyYPos + 1;
+                    } else if (!ct->ewe) {
+                        // move right, which is +x
+                        monkeyXPos = monkeyXPos + 1;
+                    } else  {
+                        // can't move.
+                    }
+                    break;
+                case 3:
+                    if (!ct->wwe) {
+                        // move left, which is -x
+                        monkeyXPos = monkeyXPos - 1;
+                    } else if (!ct->nwe) {
+                        // move north, which is -z
+                        monkeyYPos = monkeyYPos + 1;
+                    } else if (!ct->ewe) {
+                        // move right, which is +x
+                        monkeyXPos = monkeyXPos + 1;
+                    } else if (!ct->swe) {
+                        // move back, which is +z
+                        monkeyYPos = monkeyYPos - 1;
+                    } else  {
+                        // can't move.
+                    }
+                    break;
+            }
+        }
+    //}
+    
+    NSLog(@"PREPOS2:%f, %f", monkeyXPos, monkeyYPos);
+
+    if (monkeyYPos <= 0) {
+        monkeyYPos = 0;
+    }
+    
+    if (monkeyYPos >= 3) {
+        monkeyYPos = 3;
+    }
+    
+    if (monkeyXPos <= 0) {
+        monkeyXPos = 0;
+    }
+    
+    if (monkeyXPos >= 3) {
+        monkeyXPos = 3;
+    }
+    
+    NSLog(@"POS:%f, %f", monkeyXPos, monkeyYPos);
+
 }
 
 - (IBAction)panning:(UIPanGestureRecognizer *)sender {
@@ -435,8 +549,8 @@ GLfloat gCubeVertexData[216] =
     glUseProgram(_program);
     
     // Set up base model view matrix (place camera)
-    baseModelViewMatrix = GLKMatrix4MakeTranslation(posPoint.x, -1, posPoint.y-6.0f);
-    // baseModelViewMatrix = GLKMatrix4RotateX(baseModelViewMatrix, 1);
+    baseModelViewMatrix = GLKMatrix4MakeTranslation(posPoint.x, 5, posPoint.y -2.0f);
+    baseModelViewMatrix = GLKMatrix4RotateX(baseModelViewMatrix, 1.5);
     
     // Set up model view matrix (place model in world)
     _modelViewMatrix = baseModelViewMatrix;
@@ -688,9 +802,40 @@ GLfloat gCubeVertexData[216] =
             glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
         }
     }
+    
+    // DRAW MONKEY
+    GLKMatrix4 monkeytempModelView = baseModelViewMatrix;
+    
+    // monkey moving
+    monkeytempModelView = GLKMatrix4Translate(monkeytempModelView, monkeyXPos*1.5, 0, monkeyYPos*-1.5);
+    // monkey scaling
+    monkeytempModelView = GLKMatrix4Scale(monkeytempModelView, 1, 2, 1);
+    GLKMatrix4 monkeytempNormal = GLKMatrix4InvertAndTranspose(monkeytempModelView, NULL);
+    
+    GLKMatrix4 monkeytempModelProj = GLKMatrix4Multiply(projectionMatrix, monkeytempModelView);
+    
+    glBindTexture(GL_TEXTURE_2D, CT3);
+    glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
+    
+    // Set up uniforms
+    glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, monkeytempModelProj.m);
+    glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, monkeytempNormal.m);
+    glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEW_MATRIX], 1, 0, monkeytempModelView.m);
+    /* set lighting parameters... */
+    glUniform3fv(uniforms[UNIFORM_FLASHLIGHT_POSITION], 1, flashlightPosition.v);
+    glUniform3fv(uniforms[UNIFORM_DIFFUSE_LIGHT_POSITION], 1, diffuseLightPosition.v);
+    glUniform4fv(uniforms[UNIFORM_DIFFUSE_COMPONENT], 1, diffuseComponent.v);
+    glUniform1f(uniforms[UNIFORM_SHININESS], shininess);
+    glUniform4fv(uniforms[UNIFORM_SPECULAR_COMPONENT], 1, specularComponent.v);
+    glUniform4fv(uniforms[UNIFORM_AMBIENT_COMPONENT], 1, ambientComponent.v);
+    
+    // Select VBO and draw
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0); // CHANGE YOUR INDICES HERE
+    
 }
-    
-    
+
+
 #pragma mark -  OpenGL ES 2 shader compilation
 
 - (BOOL)loadShaders
