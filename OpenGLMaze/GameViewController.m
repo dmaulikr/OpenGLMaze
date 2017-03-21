@@ -418,7 +418,7 @@ GLfloat gCubeVertexData[216] =
     }
     
     // monkey movement
-    // if (canmove) {
+    if (canmove) { // By Default this is false, setup so that we double tap to stop moving
         // randomly move monkey in the maze
         // current position = monkeyXPos and monekyYPos
         
@@ -502,7 +502,7 @@ GLfloat gCubeVertexData[216] =
             }
         }
      }
-    //}
+    }
     
     NSLog(@"PREPOS2:%f, %f",monkeyXPos, monkeyYPos);
 
