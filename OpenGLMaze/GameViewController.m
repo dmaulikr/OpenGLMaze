@@ -124,8 +124,7 @@ GLfloat gCubeVertexData[216] =
     GLfloat *vertices, *normals, *texCoords;
     GLuint numIndices, *indices;
     GLfloat *mvertices, *mnormals, *mtextures;
-    GLuint *mindices;
-    int *mcount;
+    GLuint *mcount, *mindices;
     /* texture parameters ??? */
     GLuint crateTexture;
     GLuint CT1;
@@ -296,9 +295,7 @@ GLfloat gCubeVertexData[216] =
     glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int)*numIndices, indices, GL_STATIC_DRAW);
-    
-    glBindVertexArrayOES(0);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * numIndices, indices, GL_STATIC_DRAW);
     
     // Load in and set texture
     /* use setupTexture to create crate texture */
@@ -318,24 +315,30 @@ GLfloat gCubeVertexData[216] =
     ObjParser *objParse = [[ObjParser alloc] init];
     [objParse parseFile:path _vertices:&mvertices _normals:&mnormals _textures:&mtextures _indicies:&mindices _count:&mcount];
     
+    glGenVertexArraysOES(1, &_mvertexArray);
+    glBindVertexArrayOES(_mvertexArray);
+    
+    glGenBuffers(3, _mvertexBuffers);
+    glGenBuffers(1, &_mindexBuffer);
+    
     // Set up GL buffers - Monkey
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*3*numVerts, mvertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * (*mcount), mvertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(GLKVertexAttribPosition);
     glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*3*numVerts, mnormals, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * (*mcount), mnormals, GL_STATIC_DRAW);
     glEnableVertexAttribArray(GLKVertexAttribNormal);
     glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[2]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*3*numVerts, mtextures, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * (*mcount), mtextures, GL_STATIC_DRAW);
     glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
     glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * *mcount, mindices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * (*mcount), mindices, GL_STATIC_DRAW);
     
     glBindVertexArrayOES(0);
 }
@@ -448,7 +451,7 @@ GLfloat gCubeVertexData[216] =
     _normalMatrix = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(_modelViewMatrix), NULL);
     
     // Calculate projection matrix
-    float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
+    float aspect = fabs(self.view.bounds.size.width / self.view.bounds.size.height);
     projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, 0.1f, 100.0f);
     
     _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, _modelViewMatrix);
@@ -473,7 +476,6 @@ GLfloat gCubeVertexData[216] =
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 
-    
     // mazegeneration
     for (tile *t in tilearray) {
         // draw floor
@@ -688,9 +690,15 @@ GLfloat gCubeVertexData[216] =
             glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
         }
     }
+    // Select VBO and draw
+//    glBindVertexArrayOES(_mindexBuffer);
+//    glDrawArrays(GL_TRIANGLES, 0, *mcount);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
+    glDrawElements(GL_TRIANGLES, *mcount, GL_UNSIGNED_INT, 0);
+    glBindVertexArrayOES(0); // reset buffer
 }
-    
-    
+
+
 #pragma mark -  OpenGL ES 2 shader compilation
 
 - (BOOL)loadShaders

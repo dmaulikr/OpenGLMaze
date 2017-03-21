@@ -9,15 +9,18 @@
 #import "ObjParser.h"
 
 @implementation ObjParser
-- (void)parseFile: (NSString *)_path _vertices:(GLfloat **)_vertices _normals:(GLfloat **)_normals _textures:(GLfloat **)_textures _indicies:(GLuint **)_indicies _count:(int **)_count
+- (void)parseFile: (NSString *)_path _vertices:(GLfloat **)_vertices _normals:(GLfloat **)_normals _textures:(GLfloat **)_textures _indicies:(GLuint **)_indicies _count:(GLuint **)_count
    {
        NSArray *lineArray;
-       int vcur = 0, ncur = 0, tcur = 0, icur = 0;
+       int vcur = 0, ncur = 0, tcur = 0;
+       GLuint *icur;
        NSMutableArray   *v = [[NSMutableArray alloc] init],
                         *n = [[NSMutableArray alloc] init],
                         *t = [[NSMutableArray alloc] init],
                         *i = [[NSMutableArray alloc] init];
        NSString *fileContents = [NSString stringWithContentsOfFile:_path encoding:NSUTF8StringEncoding error:NULL];
+       icur = malloc(sizeof(GLuint));
+       *icur = 0;
        for (NSString *line in [fileContents componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]) {
            if ([line hasPrefix:@"v "]) {
                lineArray = [line componentsSeparatedByString:@" "];
@@ -46,32 +49,34 @@
                    NSArray *temp = [lineArray[ff] componentsSeparatedByString:@"/"];
                    [i addObject:temp[0]];
                    [i addObject:temp[2]];
-                   icur = icur + 2;
+                   *icur = *icur + 2;
                }
            }
        }
        [self convertArraytoGLfloat:v]; // sets glf
-       [self copyGLfloat:glf to:_vertices count:vcur];
+       [self copyGLfloat:&glf to:_vertices count:vcur];
        [self convertArraytoGLfloat:n];
-       [self copyGLfloat:glf to:_normals count:ncur];
+       [self copyGLfloat:&glf to:_normals count:ncur];
        [self convertArraytoGLfloat:t];
-       [self copyGLfloat:glf to:_textures count:tcur];
+       [self copyGLfloat:&glf to:_textures count:tcur];
        [self convertArraytoGLuint:i];
-       [self copyGLuint:glu to:_indicies count:icur];
-       *_count = realloc(*_count, sizeof(int));
-       *_count = &icur;
+       [self copyGLuint:&glu to:_indicies count:*icur];
+       *_count = realloc(*_count, sizeof(GLuint));
+       *_count = icur;
    }
-- (void)copyGLfloat: (GLfloat*)from to:(GLfloat **)to count:(int)count {
-    *&to = malloc(sizeof(GLfloat) * count);
-    for(int i = 0; i < count; i++) {
-        to[i] = &from[i];
-    }
+- (void)copyGLfloat: (GLfloat **)from to:(GLfloat **)to count:(int)count {
+    *to = malloc(sizeof(GLfloat) * count);
+    memcpy(*to, *from, (sizeof(GLfloat) * count));
+//    for(int i = 0; i < count; i++) {
+//        to[i] = &from[i];
+//    }
 }
-- (void)copyGLuint: (GLuint*)from to:(GLuint **)to count:(int)count {
-    *&to = malloc(sizeof(GLuint) * count);
-    for(int i = 0; i < count; i++) {
-        to[i] = &from[i];
-    }
+- (void)copyGLuint: (GLuint **)from to:(GLuint **)to count:(GLuint)count {
+    *to = malloc(sizeof(GLuint) * count);
+    memcpy(*to, *from, (sizeof(GLuint) * count));
+//    for(int i = 0; i < count; i++) {
+//        to[i] = &from[i];
+//    }
 }
 - (void)convertArraytoGLfloat:(NSMutableArray *)ns {
     glf = realloc(glf, sizeof([ns count]));
