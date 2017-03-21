@@ -165,6 +165,8 @@ GLfloat gCubeVertexData[216] =
     float monkeyYPos;
     BOOL moving;
     BOOL canmove;
+    float moved;
+    int movingdir;
 }
 @property (strong, nonatomic) EAGLContext *context;
 @property (strong, nonatomic) GLKBaseEffect *effect;
@@ -422,53 +424,87 @@ GLfloat gCubeVertexData[216] =
         
         // see what walls are around me
     for (tile *ct in tilearray) {
-        
-        if ((ct->c == monkeyXPos) && (ct->r == monkeyYPos)) {
-            int r = arc4random_uniform(15);
-            int rr = arc4random_uniform(4);
-            if (r == 0) {
-                NSLog(@"POS:%d, %d, %d, %d", ct->nwe, ct->ewe, ct->swe, ct->wwe);
-                NSLog(@"PREPOS1:%f, %f", monkeyXPos, monkeyYPos);
+        if (!moving) {
+            NSLog(@"NOTMOVING");
+            if ((ct->c == (int) monkeyXPos) && (ct->r == (int) monkeyYPos)) {
+                int rr = arc4random_uniform(4);
+                    NSLog(@"POS:%d, %d, %d, %d", ct->nwe, ct->ewe, ct->swe, ct->wwe);
+                    NSLog(@"PREPOS1:%f, %f, %d", monkeyXPos, monkeyYPos, rr);
                 
-                switch (rr) {
-                    case 0:
-                        if ((!ct->nwe) && (monkeyYPos + 1 <= 3)) {
-                            // move north, which is -z
-                            monkeyYPos = monkeyYPos + 1;
-                            break;
-                        }
+                    switch (rr) {
+                        case 0:
+                            if ((!ct->nwe) && (monkeyYPos + 1 <= 3)) {
+                                // move north, which is -z
+                                //monkeyYPos = monkeyYPos + 1;
+                                movingdir = 0;
+                                moving = true;
+                                break;
+                            }
+                        case 1:
+                            if ((!ct->ewe) && (monkeyXPos +1 <=3 )) {
+                                // move right, which is +x
+                                //monkeyXPos = monkeyXPos + 1;
+                                movingdir = 1;
+                                moving = true;
+                                break;
+                            }
                         
-                    case 1:
-                        if ((!ct->ewe) && (monkeyXPos +1 <=3 )) {
-                            // move right, which is +x
-                            monkeyXPos = monkeyXPos + 1;
-                            break;
-                        }
-                        
-                    case 2:
-                        if ((!ct->swe) && (monkeyYPos -1 >= 0)) {
-                            // move back, which is +z
-                            monkeyYPos = monkeyYPos - 1;
-                            break;
-                        }
-                    case 3:
-                        if ((!ct->wwe) && (monkeyXPos -1 >= 0)) {
-                            // move left, which is -x
-                            monkeyXPos = monkeyXPos - 1;
-                        }
+                        case 2:
+                            if ((!ct->swe) && (monkeyYPos -1 >= 0)) {
+                                // move back, which is +z
+                                //monkeyYPos = monkeyYPos - 1;
+                                movingdir = 2;
+                                moving = true;
+                                break;
+                            }
+                        case 3:
+                            if ((!ct->wwe) && (monkeyXPos -1 >= 0)) {
+                                // move left, which is -x
+                                //monkeyXPos = monkeyXPos - 1;
+                                movingdir = 3;
+                                moving = true;
+                            }
                         break;
-                }
+                    }
+                
             }
 
         }
         
     }
-    
-    
-    
+    if (moving) {
+        if (moved >= 1) {
+            moving = false;
+            moved = 0;
+            movingdir = 5;
+            monkeyXPos = (int) monkeyXPos;
+            monkeyYPos = (int) monkeyYPos;	
+        } else {
+            switch (movingdir) {
+                case 0:
+                    monkeyYPos = monkeyYPos + 0.05f;
+                    moved += 0.05f;
+                    break;
+                case 1:
+                    monkeyXPos = monkeyXPos + 0.05f;
+                    moved += 0.05f;
+                    break;
+                case 2:
+                    monkeyYPos = monkeyYPos - 0.05f;
+                    moved += 0.05f;
+                    break;
+                case 3:
+                    monkeyXPos = monkeyXPos - 0.05f;
+                    moved += 0.05f;
+                    break;
+                default:
+                    break;
+            }
+        }
+     }
     //}
     
-    NSLog(@"PREPOS2:%f, %f", monkeyXPos, monkeyYPos);
+    NSLog(@"PREPOS2:%f, %f",monkeyXPos, monkeyYPos);
 
     if (monkeyYPos <= 0) {
         monkeyYPos = 0;
