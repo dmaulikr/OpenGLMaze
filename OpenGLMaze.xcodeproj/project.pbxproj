@@ -25,6 +25,12 @@
 		09500FE31E7B279E009AF693 /* MazeConnector.mm in Sources */ = {isa = PBXBuildFile; fileRef = 09500FD01E7B279E009AF693 /* MazeConnector.mm */; };
 		09500FE41E7B279E009AF693 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 09500FD21E7B279E009AF693 /* Shader.fsh */; };
 		09500FE51E7B279E009AF693 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 09500FD31E7B279E009AF693 /* Shader.vsh */; };
+		095833151E8224B900B37ABC /* circle.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 095833131E8224B900B37ABC /* circle.mtl */; };
+		095833161E8224B900B37ABC /* circle.obj in Resources */ = {isa = PBXBuildFile; fileRef = 095833141E8224B900B37ABC /* circle.obj */; };
+		095833191E8229CB00B37ABC /* cube.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 095833171E8229CB00B37ABC /* cube.mtl */; };
+		0958331A1E8229CB00B37ABC /* cube.obj in Resources */ = {isa = PBXBuildFile; fileRef = 095833181E8229CB00B37ABC /* cube.obj */; };
+		09605F8C1E82486100A1C6E6 /* cube2.obj in Resources */ = {isa = PBXBuildFile; fileRef = 09605F8A1E82486100A1C6E6 /* cube2.obj */; };
+		09605F8D1E82486100A1C6E6 /* cube2.png in Resources */ = {isa = PBXBuildFile; fileRef = 09605F8B1E82486100A1C6E6 /* cube2.png */; };
 		09EC95A01E7F577B0005E425 /* ObjParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 09EC959F1E7F577B0005E425 /* ObjParser.m */; };
 		09EC95A41E7F59440005E425 /* monkey.obj in Resources */ = {isa = PBXBuildFile; fileRef = 09EC95A31E7F59440005E425 /* monkey.obj */; };
 		09EC95A61E7F59610005E425 /* monkey.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 09EC95A51E7F59610005E425 /* monkey.mtl */; };
@@ -54,6 +60,12 @@
 		09500FD01E7B279E009AF693 /* MazeConnector.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MazeConnector.mm; sourceTree = "<group>"; };
 		09500FD21E7B279E009AF693 /* Shader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.fsh; sourceTree = "<group>"; };
 		09500FD31E7B279E009AF693 /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.vsh; sourceTree = "<group>"; };
+		095833131E8224B900B37ABC /* circle.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = circle.mtl; sourceTree = "<group>"; };
+		095833141E8224B900B37ABC /* circle.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = circle.obj; sourceTree = "<group>"; };
+		095833171E8229CB00B37ABC /* cube.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cube.mtl; sourceTree = "<group>"; };
+		095833181E8229CB00B37ABC /* cube.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cube.obj; sourceTree = "<group>"; };
+		09605F8A1E82486100A1C6E6 /* cube2.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cube2.obj; sourceTree = "<group>"; };
+		09605F8B1E82486100A1C6E6 /* cube2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cube2.png; sourceTree = "<group>"; };
 		09EC959F1E7F577B0005E425 /* ObjParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ObjParser.m; sourceTree = "<group>"; };
 		09EC95A11E7F57A60005E425 /* ObjParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjParser.h; sourceTree = "<group>"; };
 		09EC95A31E7F59440005E425 /* monkey.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = monkey.obj; sourceTree = "<group>"; };
@@ -124,6 +136,12 @@
 		09EC95A21E7F593A0005E425 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				09605F8A1E82486100A1C6E6 /* cube2.obj */,
+				09605F8B1E82486100A1C6E6 /* cube2.png */,
+				095833171E8229CB00B37ABC /* cube.mtl */,
+				095833181E8229CB00B37ABC /* cube.obj */,
+				095833131E8224B900B37ABC /* circle.mtl */,
+				095833141E8224B900B37ABC /* circle.obj */,
 				09EC95A51E7F59610005E425 /* monkey.mtl */,
 				09EC95A31E7F59440005E425 /* monkey.obj */,
 			);
@@ -210,14 +228,20 @@
 				09500FE41E7B279E009AF693 /* Shader.fsh in Resources */,
 				09500FD91E7B279E009AF693 /* c2.jpg in Resources */,
 				09500FD71E7B279E009AF693 /* Main.storyboard in Resources */,
+				09605F8D1E82486100A1C6E6 /* cube2.png in Resources */,
+				095833161E8224B900B37ABC /* circle.obj in Resources */,
+				0958331A1E8229CB00B37ABC /* cube.obj in Resources */,
 				09500FDB1E7B279E009AF693 /* c4.jpg in Resources */,
 				09EC95A61E7F59610005E425 /* monkey.mtl in Resources */,
+				095833151E8224B900B37ABC /* circle.mtl in Resources */,
+				09605F8C1E82486100A1C6E6 /* cube2.obj in Resources */,
 				09500FD81E7B279E009AF693 /* c1.jpg in Resources */,
 				09500FDA1E7B279E009AF693 /* c3.jpg in Resources */,
 				09500FDC1E7B279E009AF693 /* c5.jpg in Resources */,
 				09500FE51E7B279E009AF693 /* Shader.vsh in Resources */,
 				09500FD51E7B279E009AF693 /* Assets.xcassets in Resources */,
 				09500FE01E7B279E009AF693 /* Info.plist in Resources */,
+				095833191E8229CB00B37ABC /* cube.mtl in Resources */,
 				09500FD61E7B279E009AF693 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

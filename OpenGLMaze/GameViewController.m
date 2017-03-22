@@ -124,7 +124,7 @@ GLfloat gCubeVertexData[216] =
     GLfloat *vertices, *normals, *texCoords;
     GLuint numIndices, *indices;
     GLfloat *mvertices, *mnormals, *mtextures;
-    GLuint *mcount, *mindices;
+    GLuint *mvcount, *mncount, *mtcount, *micount, *mindices;
     /* texture parameters ??? */
     GLuint crateTexture;
     GLuint CT1;
@@ -132,6 +132,7 @@ GLfloat gCubeVertexData[216] =
     GLuint CT3;
     GLuint CT4;
     GLuint CT5;
+    GLuint cubeTex;
     
     // GLES buffer IDs
     GLuint _vertexArray;
@@ -207,6 +208,10 @@ GLfloat gCubeVertexData[216] =
     fog.textColor = [UIColor redColor];
     fogamt.textColor = [UIColor redColor];
     flashlight.textColor = [UIColor redColor];
+    
+    UITapGestureRecognizer *doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleMovement:)];
+    doubleTapGesture.numberOfTapsRequired = 2;
+    [self.view addGestureRecognizer:doubleTapGesture];
 
     [self setupGL];
 }
@@ -311,17 +316,18 @@ GLfloat gCubeVertexData[216] =
     CT3 = [self setupTexture:@"c3.jpg"];
     CT4 = [self setupTexture:@"c4.jpg"];
     CT5 = [self setupTexture:@"c5.jpg"];
+    cubeTex = [self setupTexture:@"cube2.png"];
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, crateTexture);
     glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
 
-#pragma mark - Load Monkey Model (Test)
+#pragma mark Load .OBJ Model
     NSBundle *mainBundle = [NSBundle mainBundle];
-    NSString *path = [mainBundle pathForResource:@"monkey" ofType:@"obj"];
+    NSString *path = [mainBundle pathForResource:@"cube2" ofType:@"obj"];
     ObjParser *objParse = [[ObjParser alloc] init];
-    [objParse parseFile:path _vertices:&mvertices _normals:&mnormals _textures:&mtextures _indicies:&mindices _count:&mcount];
+    [objParse parseFile:path _vertices:&mvertices _normals:&mnormals _textures:&mtextures _indicies:&mindices _vcount:&mvcount _ncount:&mncount _tcount:&mtcount _count:&micount];
     
-    glGenVertexArraysOES(1, &_mvertexArray);
+    glGenVertexArraysOES(1, &_mvertexArray); // number of objects to generate, pointer to arrays
     glBindVertexArrayOES(_mvertexArray);
     
     glGenBuffers(3, _mvertexBuffers);
@@ -329,22 +335,22 @@ GLfloat gCubeVertexData[216] =
     
     // Set up GL buffers - Monkey
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * (*mcount), mvertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mvcount), mvertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(GLKVertexAttribPosition);
     glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * (*mcount), mnormals, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mncount), mnormals, GL_STATIC_DRAW);
     glEnableVertexAttribArray(GLKVertexAttribNormal);
     glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[2]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * (*mcount), mtextures, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mtcount), mtextures, GL_STATIC_DRAW);
     glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
     glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * (*mcount), mindices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * (*micount), mindices, GL_STATIC_DRAW);
     
     glBindVertexArrayOES(0);
 }
@@ -417,20 +423,17 @@ GLfloat gCubeVertexData[216] =
         }
     }
     
+# pragma mark ObjectMovement
     // monkey movement
     if (canmove) { // By Default this is false, setup so that we double tap to stop moving
         // randomly move monkey in the maze
         // current position = monkeyXPos and monekyYPos
         
         // see what walls are around me
-    for (tile *ct in tilearray) {
-        if (!moving) {
-            NSLog(@"NOTMOVING");
-            if ((ct->c == (int) monkeyXPos) && (ct->r == (int) monkeyYPos)) {
-                int rr = arc4random_uniform(4);
-                    NSLog(@"POS:%d, %d, %d, %d", ct->nwe, ct->ewe, ct->swe, ct->wwe);
-                    NSLog(@"PREPOS1:%f, %f, %d", monkeyXPos, monkeyYPos, rr);
-                
+        for (tile *ct in tilearray) {
+            if (!moving) {
+                if ((ct->c == (int) monkeyXPos) && (ct->r == (int) monkeyYPos)) {
+                    int rr = arc4random_uniform(4);
                     switch (rr) {
                         case 0:
                             if ((!ct->nwe) && (monkeyYPos + 1 <= 3)) {
@@ -466,45 +469,40 @@ GLfloat gCubeVertexData[216] =
                             }
                         break;
                     }
-                
-            }
-
-        }
-        
-    }
-    if (moving) {
-        if (moved >= 1) {
-            moving = false;
-            moved = 0;
-            movingdir = 5;
-            monkeyXPos = (int) monkeyXPos;
-            monkeyYPos = (int) monkeyYPos;	
-        } else {
-            switch (movingdir) {
-                case 0:
-                    monkeyYPos = monkeyYPos + 0.05f;
-                    moved += 0.05f;
-                    break;
-                case 1:
-                    monkeyXPos = monkeyXPos + 0.05f;
-                    moved += 0.05f;
-                    break;
-                case 2:
-                    monkeyYPos = monkeyYPos - 0.05f;
-                    moved += 0.05f;
-                    break;
-                case 3:
-                    monkeyXPos = monkeyXPos - 0.05f;
-                    moved += 0.05f;
-                    break;
-                default:
-                    break;
+                }
             }
         }
-     }
+        if (moving) {
+            if (moved >= 1) {
+                moving = false;
+                moved = 0;
+                movingdir = 5;
+                monkeyXPos = (int) monkeyXPos;
+                monkeyYPos = (int) monkeyYPos;	
+            } else {
+                switch (movingdir) {
+                    case 0:
+                        monkeyYPos = monkeyYPos + 0.05f;
+                        moved += 0.05f;
+                        break;
+                    case 1:
+                        monkeyXPos = monkeyXPos + 0.05f;
+                        moved += 0.05f;
+                        break;
+                    case 2:
+                        monkeyYPos = monkeyYPos - 0.05f;
+                        moved += 0.05f;
+                        break;
+                    case 3:
+                        monkeyXPos = monkeyXPos - 0.05f;
+                        moved += 0.05f;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
-    
-    NSLog(@"PREPOS2:%f, %f",monkeyXPos, monkeyYPos);
 
     if (monkeyYPos <= 0) {
         monkeyYPos = 0;
@@ -521,9 +519,6 @@ GLfloat gCubeVertexData[216] =
     if (abs((int) monkeyXPos) >= 3) {
         monkeyXPos = 3;
     }
-    
-    NSLog(@"POS:%f, %f", monkeyXPos, monkeyYPos);
-
 }
 
 - (IBAction)panning:(UIPanGestureRecognizer *)sender {
@@ -539,6 +534,10 @@ GLfloat gCubeVertexData[216] =
 - (IBAction)reset:(UITapGestureRecognizer *)sender {
     posPoint.x = 0;
     posPoint.y = 0;
+}
+
+- (void)toggleMovement:(UITapGestureRecognizer *)sender {
+    canmove = !canmove; // Default: FALSE
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
@@ -816,7 +815,7 @@ GLfloat gCubeVertexData[216] =
     
     GLKMatrix4 monkeytempModelProj = GLKMatrix4Multiply(projectionMatrix, monkeytempModelView);
     
-    glBindTexture(GL_TEXTURE_2D, CT3);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
     
     // Set up uniforms
@@ -832,10 +831,12 @@ GLfloat gCubeVertexData[216] =
     glUniform4fv(uniforms[UNIFORM_AMBIENT_COMPONENT], 1, ambientComponent.v);
     
     // Select VBO and draw
-    //    glBindVertexArrayOES(_mindexBuffer);
-    //    glDrawArrays(GL_TRIANGLES, 0, *mcount);
+    
+    glBindTexture(GL_TEXTURE_2D, cubeTex);
+    glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
+    
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
-    glDrawElements(GL_TRIANGLES, *mcount, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLE_FAN, *micount, GL_UNSIGNED_INT, 0);
     glBindVertexArrayOES(0); // reset buffer
 }
 
