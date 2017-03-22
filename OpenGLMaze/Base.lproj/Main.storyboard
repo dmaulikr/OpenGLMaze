@@ -71,6 +71,11 @@
                         <connections>
                             <outletCollection property="gestureRecognizers" destination="PQO-w1-dZf" appends="YES" id="pPP-tx-TYC"/>
                             <outletCollection property="gestureRecognizers" destination="Oh8-p3-vex" appends="YES" id="C4h-0Z-Z11"/>
+                            <outletCollection property="gestureRecognizers" destination="Otv-DE-HZ5" appends="YES" id="WDd-JB-10e"/>
+                            <outletCollection property="gestureRecognizers" destination="uBn-02-NSg" appends="YES" id="t75-i5-yIe"/>
+                            <outletCollection property="gestureRecognizers" destination="xBN-06-Kwy" appends="YES" id="0cS-hT-etY"/>
+                            <outletCollection property="gestureRecognizers" destination="eED-vQ-yBq" appends="YES" id="8cC-yK-Otf"/>
+                            <outletCollection property="gestureRecognizers" destination="fJg-1F-0Td" appends="YES" id="tOV-qk-etP"/>
                         </connections>
                     </view>
                     <connections>
@@ -85,7 +90,7 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
-                <panGestureRecognizer minimumNumberOfTouches="1" id="PQO-w1-dZf">
+                <panGestureRecognizer minimumNumberOfTouches="1" maximumNumberOfTouches="1" id="PQO-w1-dZf">
                     <connections>
                         <action selector="panning:" destination="BV1-FR-VrT" id="VsP-5e-5cB"/>
                     </connections>
@@ -95,6 +100,31 @@
                         <action selector="reset:" destination="BV1-FR-VrT" id="PH2-kk-am1"/>
                     </connections>
                 </tapGestureRecognizer>
+                <tapGestureRecognizer numberOfTapsRequired="2" numberOfTouchesRequired="2" id="Otv-DE-HZ5">
+                    <connections>
+                        <action selector="canMonkeyMove:" destination="BV1-FR-VrT" id="Wme-P4-93s"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <panGestureRecognizer minimumNumberOfTouches="2" maximumNumberOfTouches="2" id="uBn-02-NSg">
+                    <connections>
+                        <action selector="panMonkey:" destination="BV1-FR-VrT" id="Q94-8D-Eeq"/>
+                    </connections>
+                </panGestureRecognizer>
+                <panGestureRecognizer minimumNumberOfTouches="3" maximumNumberOfTouches="3" id="xBN-06-Kwy">
+                    <connections>
+                        <action selector="panMonkeyZ:" destination="BV1-FR-VrT" id="3si-lo-gn4"/>
+                    </connections>
+                </panGestureRecognizer>
+                <pinchGestureRecognizer id="eED-vQ-yBq">
+                    <connections>
+                        <action selector="scaleMonkey:" destination="BV1-FR-VrT" id="oQn-mu-xhv"/>
+                    </connections>
+                </pinchGestureRecognizer>
+                <rotationGestureRecognizer id="fJg-1F-0Td">
+                    <connections>
+                        <action selector="rotateMonkey:" destination="BV1-FR-VrT" id="V8C-u2-LMe"/>
+                    </connections>
+                </rotationGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="116" y="123.68815592203899"/>
         </scene>

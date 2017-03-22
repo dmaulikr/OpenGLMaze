@@ -162,7 +162,12 @@ GLfloat gCubeVertexData[216] =
     GLKMatrix4 baseModelViewMatrix;
     
     float monkeyXPos;
-    float monkeyYPos;
+    float monkeyYPos; // note: this is a misnomer and actually is the z value
+    float monkeyXPosUser;
+    float monkeyYPosUser;
+    float monkeyZPosUser;
+    float monkeyRotateValue;
+    float scalevalue;
     BOOL moving;
     BOOL canmove;
     float moved;
@@ -200,6 +205,7 @@ GLfloat gCubeVertexData[216] =
     [lemaze CreateMaze];
     
     fogalpha = 1;
+    scalevalue = 1;
     
     tilearray = [[NSMutableArray alloc] initWithCapacity:16];
     
@@ -423,88 +429,88 @@ GLfloat gCubeVertexData[216] =
         // current position = monkeyXPos and monekyYPos
         
         // see what walls are around me
-    for (tile *ct in tilearray) {
-        if (!moving) {
-            NSLog(@"NOTMOVING");
-            if ((ct->c == (int) monkeyXPos) && (ct->r == (int) monkeyYPos)) {
-                int rr = arc4random_uniform(4);
-                    NSLog(@"POS:%d, %d, %d, %d", ct->nwe, ct->ewe, ct->swe, ct->wwe);
-                    NSLog(@"PREPOS1:%f, %f, %d", monkeyXPos, monkeyYPos, rr);
-                
-                    switch (rr) {
-                        case 0:
-                            if ((!ct->nwe) && (monkeyYPos + 1 <= 3)) {
-                                // move north, which is -z
-                                //monkeyYPos = monkeyYPos + 1;
-                                movingdir = 0;
-                                moving = true;
-                                break;
-                            }
-                        case 1:
-                            if ((!ct->ewe) && (monkeyXPos +1 <=3 )) {
-                                // move right, which is +x
-                                //monkeyXPos = monkeyXPos + 1;
-                                movingdir = 1;
-                                moving = true;
-                                break;
-                            }
-                        
-                        case 2:
-                            if ((!ct->swe) && (monkeyYPos -1 >= 0)) {
-                                // move back, which is +z
-                                //monkeyYPos = monkeyYPos - 1;
-                                movingdir = 2;
-                                moving = true;
-                                break;
-                            }
-                        case 3:
-                            if ((!ct->wwe) && (monkeyXPos -1 >= 0)) {
-                                // move left, which is -x
-                                //monkeyXPos = monkeyXPos - 1;
-                                movingdir = 3;
-                                moving = true;
-                            }
-                        break;
-                    }
-                
-            }
+        for (tile *ct in tilearray) {
+            if (!moving) {
+                //NSLog(@"NOTMOVING");
+                if ((ct->c == (int) monkeyXPos) && (ct->r == (int) monkeyYPos)) {
+                    int rr = arc4random_uniform(4);
+                       // NSLog(@"POS:%d, %d, %d, %d", ct->nwe, ct->ewe, ct->swe, ct->wwe);
+                       // NSLog(@"PREPOS1:%f, %f, %d", monkeyXPos, monkeyYPos, rr);
+                    
+                        switch (rr) {
+                            case 0:
+                                if ((!ct->nwe) && (monkeyYPos + 1 <= 3)) {
+                                    // move north, which is -z
+                                    //monkeyYPos = monkeyYPos + 1;
+                                    movingdir = 0;
+                                    moving = true;
+                                    break;
+                                }
+                            case 1:
+                                if ((!ct->ewe) && (monkeyXPos +1 <=3 )) {
+                                    // move right, which is +x
+                                    //monkeyXPos = monkeyXPos + 1;
+                                    movingdir = 1;
+                                    moving = true;
+                                    break;
+                                }
+                            
+                            case 2:
+                                if ((!ct->swe) && (monkeyYPos -1 >= 0)) {
+                                    // move back, which is +z
+                                    //monkeyYPos = monkeyYPos - 1;
+                                    movingdir = 2;
+                                    moving = true;
+                                    break;
+                                }
+                            case 3:
+                                if ((!ct->wwe) && (monkeyXPos -1 >= 0)) {
+                                    // move left, which is -x
+                                    //monkeyXPos = monkeyXPos - 1;
+                                    movingdir = 3;
+                                    moving = true;
+                                }
+                            break;
+                        }
+                    
+                }
 
+            }
+            
         }
-        
-    }
-    if (moving) {
-        if (moved >= 1) {
-            moving = false;
-            moved = 0;
-            movingdir = 5;
-            monkeyXPos = (int) monkeyXPos;
-            monkeyYPos = (int) monkeyYPos;	
-        } else {
-            switch (movingdir) {
-                case 0:
-                    monkeyYPos = monkeyYPos + 0.05f;
-                    moved += 0.05f;
-                    break;
-                case 1:
-                    monkeyXPos = monkeyXPos + 0.05f;
-                    moved += 0.05f;
-                    break;
-                case 2:
-                    monkeyYPos = monkeyYPos - 0.05f;
-                    moved += 0.05f;
-                    break;
-                case 3:
-                    monkeyXPos = monkeyXPos - 0.05f;
-                    moved += 0.05f;
-                    break;
-                default:
-                    break;
+        if (moving) {
+            if (moved >= 1) {
+                moving = false;
+                moved = 0;
+                movingdir = 5;
+                monkeyXPos = (int) roundf(monkeyXPos);
+                monkeyYPos = (int) roundf(monkeyYPos);
+            } else {
+                switch (movingdir) {
+                    case 0:
+                        monkeyYPos = monkeyYPos + 0.05f;
+                        moved += 0.05f;
+                        break;
+                    case 1:
+                        monkeyXPos = monkeyXPos + 0.05f;
+                        moved += 0.05f;
+                        break;
+                    case 2:
+                        monkeyYPos = monkeyYPos - 0.05f;
+                        moved += 0.05f;
+                        break;
+                    case 3:
+                        monkeyXPos = monkeyXPos - 0.05f;
+                        moved += 0.05f;
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-     }
     }
     
-    NSLog(@"PREPOS2:%f, %f",monkeyXPos, monkeyYPos);
+    //NSLog(@"PREPOS2:%f, %f",monkeyXPos, monkeyYPos);
 
     if (monkeyYPos <= 0) {
         monkeyYPos = 0;
@@ -522,7 +528,7 @@ GLfloat gCubeVertexData[216] =
         monkeyXPos = 3;
     }
     
-    NSLog(@"POS:%f, %f", monkeyXPos, monkeyYPos);
+    //NSLog(@"POS:%f, %f", monkeyXPos, monkeyYPos);
 
 }
 
@@ -539,6 +545,57 @@ GLfloat gCubeVertexData[216] =
 - (IBAction)reset:(UITapGestureRecognizer *)sender {
     posPoint.x = 0;
     posPoint.y = 0;
+}
+
+- (IBAction)canMonkeyMove:(UITapGestureRecognizer *)sender {
+    
+    if (canmove) {
+        canmove = false;
+    } else {
+        canmove = true;
+        monkeyYPosUser = 0;
+        monkeyXPosUser = 0;
+        monkeyZPosUser = 0;
+        scalevalue = 1;
+        monkeyRotateValue = 0;
+    }
+}
+
+- (IBAction)panMonkey:(UIPanGestureRecognizer *)sender {
+    if (!canmove) {
+        if ((sender.state == UIGestureRecognizerStateBegan)
+            || (sender.state == UIGestureRecognizerStateChanged)) {
+            CGPoint x = [sender velocityInView:self.view];
+            
+            monkeyXPosUser += x.x/1000;
+            monkeyZPosUser += x.y/1000;
+            
+            NSLog(@"MXY: %f, %f", monkeyXPosUser, monkeyZPosUser);
+        }
+    }
+}
+// unused
+- (IBAction)panMonkeyZ:(UIPanGestureRecognizer *)sender {
+}
+- (IBAction)scaleMonkey:(UIPinchGestureRecognizer *)sender {
+    if (!canmove) {
+        scalevalue = sender.scale;
+    }
+}
+- (IBAction)rotateMonkey:(UIRotationGestureRecognizer *)sender {
+    
+    if (!canmove) {
+        if ((sender.state == UIGestureRecognizerStateBegan)
+            || (sender.state == UIGestureRecognizerStateChanged)) {
+         
+//            CGAffineTransform t = CGAffineTransformMakeRotation([sender rotation]);
+            
+            monkeyRotateValue = [sender rotation];
+            
+            
+        }
+    }
+    
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
@@ -809,10 +866,13 @@ GLfloat gCubeVertexData[216] =
     GLKMatrix4 monkeytempModelView = baseModelViewMatrix;
     
     // monkey moving
-    monkeytempModelView = GLKMatrix4Translate(monkeytempModelView, monkeyXPos*1.5, .5, monkeyYPos*-1.5);
+    monkeytempModelView = GLKMatrix4Translate(monkeytempModelView, monkeyXPos*1.5 + monkeyXPosUser, .5 + monkeyYPosUser, monkeyYPos*-1.5 + monkeyZPosUser);
     // monkey scaling
-    monkeytempModelView = GLKMatrix4Scale(monkeytempModelView, .6, .6, .6);
+    monkeytempModelView = GLKMatrix4Scale(monkeytempModelView, .6 * scalevalue, .6 * scalevalue, .6 * scalevalue);
     GLKMatrix4 monkeytempNormal = GLKMatrix4InvertAndTranspose(monkeytempModelView, NULL);
+    
+    // monkey rotation
+    monkeytempModelView = GLKMatrix4RotateY(monkeytempModelView, monkeyRotateValue * -1);
     
     GLKMatrix4 monkeytempModelProj = GLKMatrix4Multiply(projectionMatrix, monkeytempModelView);
     
