@@ -163,7 +163,12 @@ GLfloat gCubeVertexData[216] =
     GLKMatrix4 baseModelViewMatrix;
     
     float monkeyXPos;
-    float monkeyYPos;
+    float monkeyYPos; // note: this is a misnomer and actually is the z value
+    float monkeyXPosUser;
+    float monkeyYPosUser;
+    float monkeyZPosUser;
+    float monkeyRotateValue;
+    float scalevalue;
     BOOL moving;
     BOOL canmove;
     float moved;
@@ -201,6 +206,7 @@ GLfloat gCubeVertexData[216] =
     [lemaze CreateMaze];
     
     fogalpha = 1;
+    scalevalue = 1;
     
     tilearray = [[NSMutableArray alloc] initWithCapacity:16];
     
@@ -208,10 +214,6 @@ GLfloat gCubeVertexData[216] =
     fog.textColor = [UIColor redColor];
     fogamt.textColor = [UIColor redColor];
     flashlight.textColor = [UIColor redColor];
-    
-    UITapGestureRecognizer *doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleMovement:)];
-    doubleTapGesture.numberOfTapsRequired = 2;
-    [self.view addGestureRecognizer:doubleTapGesture];
 
     [self setupGL];
 }
@@ -336,25 +338,25 @@ GLfloat gCubeVertexData[216] =
     // Set up GL buffers - Monkey
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mvcount), mvertices, GL_STATIC_DRAW);
-    for(int i = 0; i < *mvcount; i+=3) NSLog(@"%f %f %f", mvertices[i], mvertices[i+1], mvertices[i+2]);
+//    for(int i = 0; i < *mvcount; i+=3) NSLog(@"%f %f %f", mvertices[i], mvertices[i+1], mvertices[i+2]);
     glEnableVertexAttribArray(GLKVertexAttribPosition);
     glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[2]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mtcount), mtextures, GL_STATIC_DRAW);
-    for(int i = 0; i < *mtcount; i+=2) NSLog(@"%f %f", mtextures[i], mtextures[i+1]);
+//    for(int i = 0; i < *mtcount; i+=2) NSLog(@"%f %f", mtextures[i], mtextures[i+1]);
     glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
     glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[1]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mncount), mnormals, GL_STATIC_DRAW);
-    for(int i = 0; i < *mncount; i+=3) NSLog(@"%f %f %f", mnormals[i], mnormals[i+1], mnormals[i+2]);
+//    for(int i = 0; i < *mncount; i+=3) NSLog(@"%f %f %f", mnormals[i], mnormals[i+1], mnormals[i+2]);
     glEnableVertexAttribArray(GLKVertexAttribNormal);
     glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * (*micount), mindices, GL_STATIC_DRAW);
-    for(int i = 0; i < *micount; i+=9) NSLog(@"%d/%d/%d, %d/%d/%d, %d/%d/%d", mindices[i], mindices[i+1], mindices[i+2], mindices[i+3], mindices[i+4], mindices[i+5], mindices[i+6], mindices[i+7], mindices[i+8]);
+//    for(int i = 0; i < *micount; i+=9) NSLog(@"%d/%d/%d, %d/%d/%d, %d/%d/%d", mindices[i], mindices[i+1], mindices[i+2], mindices[i+3], mindices[i+4], mindices[i+5], mindices[i+6], mindices[i+7], mindices[i+8]);
     
     glBindVertexArrayOES(0);
 }
@@ -436,44 +438,50 @@ GLfloat gCubeVertexData[216] =
         // see what walls are around me
         for (tile *ct in tilearray) {
             if (!moving) {
+                //NSLog(@"NOTMOVING");
                 if ((ct->c == (int) monkeyXPos) && (ct->r == (int) monkeyYPos)) {
                     int rr = arc4random_uniform(4);
-                    switch (rr) {
-                        case 0:
-                            if ((!ct->nwe) && (monkeyYPos + 1 <= 3)) {
-                                // move north, which is -z
-                                //monkeyYPos = monkeyYPos + 1;
-                                movingdir = 0;
-                                moving = true;
-                                break;
-                            }
-                        case 1:
-                            if ((!ct->ewe) && (monkeyXPos +1 <=3 )) {
-                                // move right, which is +x
-                                //monkeyXPos = monkeyXPos + 1;
-                                movingdir = 1;
-                                moving = true;
-                                break;
-                            }
-                        
-                        case 2:
-                            if ((!ct->swe) && (monkeyYPos -1 >= 0)) {
-                                // move back, which is +z
-                                //monkeyYPos = monkeyYPos - 1;
-                                movingdir = 2;
-                                moving = true;
-                                break;
-                            }
-                        case 3:
-                            if ((!ct->wwe) && (monkeyXPos -1 >= 0)) {
-                                // move left, which is -x
-                                //monkeyXPos = monkeyXPos - 1;
-                                movingdir = 3;
-                                moving = true;
-                            }
-                        break;
-                    }
+                       // NSLog(@"POS:%d, %d, %d, %d", ct->nwe, ct->ewe, ct->swe, ct->wwe);
+                       // NSLog(@"PREPOS1:%f, %f, %d", monkeyXPos, monkeyYPos, rr);
+                    
+                        switch (rr) {
+                            case 0:
+                                if ((!ct->nwe) && (monkeyYPos + 1 <= 3)) {
+                                    // move north, which is -z
+                                    //monkeyYPos = monkeyYPos + 1;
+                                    movingdir = 0;
+                                    moving = true;
+                                    break;
+                                }
+                            case 1:
+                                if ((!ct->ewe) && (monkeyXPos +1 <=3 )) {
+                                    // move right, which is +x
+                                    //monkeyXPos = monkeyXPos + 1;
+                                    movingdir = 1;
+                                    moving = true;
+                                    break;
+                                }
+                            
+                            case 2:
+                                if ((!ct->swe) && (monkeyYPos -1 >= 0)) {
+                                    // move back, which is +z
+                                    //monkeyYPos = monkeyYPos - 1;
+                                    movingdir = 2;
+                                    moving = true;
+                                    break;
+                                }
+                            case 3:
+                                if ((!ct->wwe) && (monkeyXPos -1 >= 0)) {
+                                    // move left, which is -x
+                                    //monkeyXPos = monkeyXPos - 1;
+                                    movingdir = 3;
+                                    moving = true;
+                                }
+                            break;
+                        }
+                    
                 }
+
             }
         }
         if (moving) {
@@ -481,8 +489,8 @@ GLfloat gCubeVertexData[216] =
                 moving = false;
                 moved = 0;
                 movingdir = 5;
-                monkeyXPos = (int) monkeyXPos;
-                monkeyYPos = (int) monkeyYPos;	
+                monkeyXPos = (int) roundf(monkeyXPos);
+                monkeyYPos = (int) roundf(monkeyYPos);
             } else {
                 switch (movingdir) {
                     case 0:
@@ -507,7 +515,6 @@ GLfloat gCubeVertexData[216] =
             }
         }
     }
-
     if (monkeyYPos <= 0) {
         monkeyYPos = 0;
     }
@@ -540,8 +547,54 @@ GLfloat gCubeVertexData[216] =
     posPoint.y = 0;
 }
 
-- (void)toggleMovement:(UITapGestureRecognizer *)sender {
-    canmove = !canmove; // Default: FALSE
+- (IBAction)canMonkeyMove:(UITapGestureRecognizer *)sender {
+    
+    if (canmove) {
+        canmove = false;
+    } else {
+        canmove = true;
+        monkeyYPosUser = 0;
+        monkeyXPosUser = 0;
+        monkeyZPosUser = 0;
+        scalevalue = 1;
+        monkeyRotateValue = 0;
+    }
+}
+
+- (IBAction)panMonkey:(UIPanGestureRecognizer *)sender {
+    if (!canmove) {
+        if ((sender.state == UIGestureRecognizerStateBegan)
+            || (sender.state == UIGestureRecognizerStateChanged)) {
+            CGPoint x = [sender velocityInView:self.view];
+            
+            monkeyXPosUser += x.x/1000;
+            monkeyZPosUser += x.y/1000;
+            
+            NSLog(@"MXY: %f, %f", monkeyXPosUser, monkeyZPosUser);
+        }
+    }
+}
+// unused
+- (IBAction)panMonkeyZ:(UIPanGestureRecognizer *)sender {
+}
+- (IBAction)scaleMonkey:(UIPinchGestureRecognizer *)sender {
+    if (!canmove) {
+        scalevalue = sender.scale;
+    }
+}
+- (IBAction)rotateMonkey:(UIRotationGestureRecognizer *)sender {
+    
+    if (!canmove) {
+        if ((sender.state == UIGestureRecognizerStateBegan)
+            || (sender.state == UIGestureRecognizerStateChanged)) {
+         
+//            CGAffineTransform t = CGAffineTransformMakeRotation([sender rotation]);
+            
+            monkeyRotateValue = [sender rotation];
+            
+            
+        }
+    }
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
@@ -812,10 +865,13 @@ GLfloat gCubeVertexData[216] =
     GLKMatrix4 monkeytempModelView = baseModelViewMatrix;
     
     // monkey moving
-    monkeytempModelView = GLKMatrix4Translate(monkeytempModelView, monkeyXPos*1.5, .5, monkeyYPos*-1.5);
+    monkeytempModelView = GLKMatrix4Translate(monkeytempModelView, monkeyXPos*1.5 + monkeyXPosUser, .5 + monkeyYPosUser, monkeyYPos*-1.5 + monkeyZPosUser);
     // monkey scaling
-    monkeytempModelView = GLKMatrix4Scale(monkeytempModelView, .6, .6, .6);
+    monkeytempModelView = GLKMatrix4Scale(monkeytempModelView, .6 * scalevalue, .6 * scalevalue, .6 * scalevalue);
     GLKMatrix4 monkeytempNormal = GLKMatrix4InvertAndTranspose(monkeytempModelView, NULL);
+    
+    // monkey rotation
+    monkeytempModelView = GLKMatrix4RotateY(monkeytempModelView, monkeyRotateValue * -1);
     
     GLKMatrix4 monkeytempModelProj = GLKMatrix4Multiply(projectionMatrix, monkeytempModelView);
     
