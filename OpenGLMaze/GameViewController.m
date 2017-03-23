@@ -325,7 +325,7 @@ GLfloat gCubeVertexData[216] =
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSString *path = [mainBundle pathForResource:@"cube2" ofType:@"obj"];
     ObjParser *objParse = [[ObjParser alloc] init];
-    [objParse parseFile:path _vertices:&mvertices _normals:&mnormals _textures:&mtextures _indicies:&mindices _vcount:&mvcount _ncount:&mncount _tcount:&mtcount _count:&micount];
+    [objParse parseFile:path _vertices:&mvertices _normals:&mnormals _textures:&mtextures _indices:&mindices _vcount:&mvcount _ncount:&mncount _tcount:&mtcount _count:&micount];
     
     glGenVertexArraysOES(1, &_mvertexArray); // number of objects to generate, pointer to arrays
     glBindVertexArrayOES(_mvertexArray);
@@ -336,21 +336,25 @@ GLfloat gCubeVertexData[216] =
     // Set up GL buffers - Monkey
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mvcount), mvertices, GL_STATIC_DRAW);
+    for(int i = 0; i < *mvcount; i+=3) NSLog(@"%f %f %f", mvertices[i], mvertices[i+1], mvertices[i+2]);
     glEnableVertexAttribArray(GLKVertexAttribPosition);
-    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
-    
-    glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mncount), mnormals, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(GLKVertexAttribNormal);
-    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
+    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[2]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mtcount), mtextures, GL_STATIC_DRAW);
+    for(int i = 0; i < *mtcount; i+=2) NSLog(@"%f %f", mtextures[i], mtextures[i+1]);
     glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
-    glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), BUFFER_OFFSET(0));
+    glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), BUFFER_OFFSET(0));
+    
+    glBindBuffer(GL_ARRAY_BUFFER, _mvertexBuffers[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (*mncount), mnormals, GL_STATIC_DRAW);
+    for(int i = 0; i < *mncount; i+=3) NSLog(@"%f %f %f", mnormals[i], mnormals[i+1], mnormals[i+2]);
+    glEnableVertexAttribArray(GLKVertexAttribNormal);
+    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), BUFFER_OFFSET(0));
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * (*micount), mindices, GL_STATIC_DRAW);
+    for(int i = 0; i < *micount; i+=9) NSLog(@"%d/%d/%d, %d/%d/%d, %d/%d/%d", mindices[i], mindices[i+1], mindices[i+2], mindices[i+3], mindices[i+4], mindices[i+5], mindices[i+6], mindices[i+7], mindices[i+8]);
     
     glBindVertexArrayOES(0);
 }
@@ -835,8 +839,10 @@ GLfloat gCubeVertexData[216] =
     glBindTexture(GL_TEXTURE_2D, cubeTex);
     glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
     
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
-    glDrawElements(GL_TRIANGLE_FAN, *micount, GL_UNSIGNED_INT, 0);
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mindexBuffer);
+//    glDrawElements(GL_TRIANGLES, *micount, GL_UNSIGNED_INT, 0);
+    glBindVertexArrayOES(_mvertexArray);
+    glDrawArrays(GL_TRIANGLES, 0, *mvcount + *mtcount + *mncount);
     glBindVertexArrayOES(0); // reset buffer
 }
 
